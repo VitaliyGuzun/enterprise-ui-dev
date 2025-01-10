@@ -1,8 +1,22 @@
-import { render, screen } from 'test/utilities';
-import PackingList from '.';
+import { Provider } from 'react-redux';
+import { render as _render, screen } from 'test/utilities';
+import { PackingList } from '.';
+import { createStore } from './store/index';
+
+const render = (ui: React.ReactElement) => {
+  return _render(
+    <Provider store={createStore()}>
+      <PackingList />
+    </Provider>,
+  );
+};
 
 it('renders the Packing List application', () => {
-  render(<PackingList />);
+  render(
+    <Provider store={createStore()}>
+      <PackingList />
+    </Provider>,
+  );
 });
 
 it('has the correct title', async () => {
@@ -10,19 +24,41 @@ it('has the correct title', async () => {
   screen.getByText('Packing List');
 });
 
-it.todo('has an input field for a new item', () => {});
+it('has an input field for a new item', () => {
+  render(<PackingList />);
+  screen.getByLabelText('New Item Name');
+});
 
-it.todo(
-  'has a "Add New Item" button that is disabled when the input is empty',
-  () => {},
-);
+it('has a "Add New Item" button that is disabled when the input is empty', () => {
+  render(<PackingList />);
+  const newItemInput = screen.getByLabelText('New Item Name');
+  const addNewItemButton = screen.getByRole('button', { name: 'Add New Item' });
 
-it.todo(
-  'enables the "Add New Item" button when there is text in the input field',
-  async () => {},
-);
+  expect(newItemInput).toHaveValue('');
+  expect(addNewItemButton).toBeDisabled();
+});
 
-it.todo(
-  'adds a new item to the unpacked item list when the clicking "Add New Item"',
-  async () => {},
-);
+it('enables the "Add New Item" button when there is text in the input field', async () => {
+  const { user } = render(<PackingList />);
+  const newItemInput = screen.getByLabelText('New Item Name');
+  const addNewItemButton = screen.getByRole('button', {
+    name: 'Add New Item',
+  });
+
+  await user.type(newItemInput, 'Hello');
+  expect(newItemInput).toHaveValue('Hello');
+  expect(addNewItemButton).not.toBeDisabled();
+});
+
+it('adds a new item to the unpacked item list when the clicking "Add New Item"', async () => {
+  const { user } = render(<PackingList />);
+  const newItemInput = screen.getByLabelText('New Item Name');
+  const addNewItemButton = screen.getByRole('button', {
+    name: 'Add New Item',
+  });
+
+  await user.type(newItemInput, 'Hello');
+  await user.click(addNewItemButton);
+
+  expect(screen.getByLabelText('Hello')).not.toBeChecked();
+});
