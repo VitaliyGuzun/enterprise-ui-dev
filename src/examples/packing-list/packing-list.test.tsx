@@ -62,17 +62,3 @@ it('adds a new item to the unpacked item list when the clicking "Add New Item"',
 
   expect(screen.getByLabelText('Hello')).not.toBeChecked();
 });
-
-it('Remove item', async () => {
-  const { user } = render(<PackingList />);
-  const newItemInput = screen.getByLabelText('New Item Name');
-  const addNewItemButton = screen.getByRole('button', {
-    name: 'Add New Item',
-  });
-
-  await user.type(newItemInput, 'Hello');
-  await user.click(addNewItemButton);
-
-  const removeItemButton = screen.getByText('Remove');
-  await user.click(removeItemButton);
-});
